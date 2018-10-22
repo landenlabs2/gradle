@@ -349,7 +349,6 @@ It is also deprecated behavior to resolve a configuration from a thread that is 
 managed by the user).   Threads managed by Gradle (such as the workers that execute tasks) can still resolve configurations safely,
 but doing so from other threads will now produce a deprecation warning.
 
-
 ## External contributions
 
 We would like to thank the following community members for making contributions to this release of Gradle.
