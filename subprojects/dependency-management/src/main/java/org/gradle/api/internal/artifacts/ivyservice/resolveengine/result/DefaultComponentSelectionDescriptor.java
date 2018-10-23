@@ -25,12 +25,14 @@ public class DefaultComponentSelectionDescriptor implements ComponentSelectionDe
     private final Describable description;
     private final boolean hasCustomDescription;
     private final int hashCode;
+    private final boolean isForceAlignment;
 
     public DefaultComponentSelectionDescriptor(ComponentSelectionCause cause) {
         this.cause = cause;
         this.description = Describables.of(cause.getDefaultReason());
         this.hasCustomDescription = false;
         this.hashCode = cause.hashCode();
+        this.isForceAlignment = cause == ComponentSelectionCause.FORCED;
     }
 
     public DefaultComponentSelectionDescriptor(ComponentSelectionCause cause, Describable description) {
@@ -38,6 +40,15 @@ public class DefaultComponentSelectionDescriptor implements ComponentSelectionDe
         this.description = description;
         this.hasCustomDescription = true;
         this.hashCode = Objects.hashCode(cause, description);
+        this.isForceAlignment = cause == ComponentSelectionCause.FORCED;
+    }
+
+    private DefaultComponentSelectionDescriptor(ComponentSelectionCause cause, Describable description, boolean hasCustomDescription, int hashCode, boolean isForceAlignment) {
+        this.cause = cause;
+        this.description = description;
+        this.hasCustomDescription = hasCustomDescription;
+        this.hashCode = hashCode;
+        this.isForceAlignment = isForceAlignment;
     }
 
     @Override
@@ -88,6 +99,16 @@ public class DefaultComponentSelectionDescriptor implements ComponentSelectionDe
         if (description.equals(reason)) {
             return this;
         }
-        return new DefaultComponentSelectionDescriptor(cause, reason);
+        return new DefaultComponentSelectionDescriptor(cause, reason, true, Objects.hashCode(cause, description), isForceAlignment);
+    }
+
+    @Override
+    public ComponentSelectionDescriptorInternal markAsForceAlignment() {
+        return new DefaultComponentSelectionDescriptor(cause, description, true, hashCode, true);
+    }
+
+    @Override
+    public boolean isForceAlignment() {
+        return isForceAlignment;
     }
 }

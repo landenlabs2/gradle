@@ -36,6 +36,20 @@ public interface ComponentSelectionDescriptorInternal extends ComponentSelection
      */
     boolean hasCustomDescription();
 
+    /**
+     * Updates this component selection descriptor to indicates it forces alignment
+     *
+     * @return this descriptor
+     */
+    ComponentSelectionDescriptorInternal markAsForceAlignment();
+
+    /**
+     * Indicates whether the component selection descriptor impacts virtual platform alignment as a force.
+     *
+     * @return {@code true} if forcing, {@code false} otherwise
+     */
+    boolean isForceAlignment();
+
     Describable getDescribable();
 
 }
