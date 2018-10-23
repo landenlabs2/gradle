@@ -1,3 +1,6 @@
+// Need to have at least one configuration declared, otherwise the rules are never evaluated
+val conf by configurations.creating
+
 // tag::module_to_project_substitution[]
 configurations.all {
     resolutionStrategy.dependencySubstitution {
