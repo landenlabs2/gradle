@@ -116,6 +116,7 @@ import org.gradle.util.WrapUtil;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -1597,8 +1598,13 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
             SelectedArtifactSet selected = results.getVisitedArtifacts().select(dependencySpec, requestedAttributes, componentIdentifierSpec, allowNoMatchingVariants);
             final Set<Throwable> failures = new LinkedHashSet<Throwable>();
             selected.visitDependencies(new TaskDependencyResolveContext() {
+                private final Set<Object> seen = new HashSet<>();
+
                 @Override
                 public void add(Object dep) {
+                    if (!seen.add(dep)) {
+                        return;
+                    }
                     if (dep instanceof TaskDependencyContainer) {
                         TaskDependencyContainer container = (TaskDependencyContainer) dep;
                         container.visitDependencies(this);
@@ -1609,7 +1615,15 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
 
                 @Override
                 public void maybeAdd(Object dependency) {
-                    context.maybeAdd(dependency);
+                    if (!seen.add(dependency)) {
+                        return;
+                    }
+                    if (dependency instanceof TaskDependencyContainer) {
+                        TaskDependencyContainer container = (TaskDependencyContainer) dependency;
+                        container.visitDependencies(this);
+                    } else {
+                        context.maybeAdd(dependency);
+                    }
                 }
 
                 @Override
