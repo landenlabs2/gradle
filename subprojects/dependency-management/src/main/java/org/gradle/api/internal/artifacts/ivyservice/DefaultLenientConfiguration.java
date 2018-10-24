@@ -117,7 +117,7 @@ public class DefaultLenientConfiguration implements LenientConfiguration, Visite
                 for (UnresolvedDependency unresolvedDependency : unresolvedDependencies) {
                     visitor.visitFailure(unresolvedDependency.getProblem());
                 }
-                artifactResults.getArtifacts().collectBuildDependencies(visitor);
+                visitor.add(artifactResults);
             }
 
             @Override

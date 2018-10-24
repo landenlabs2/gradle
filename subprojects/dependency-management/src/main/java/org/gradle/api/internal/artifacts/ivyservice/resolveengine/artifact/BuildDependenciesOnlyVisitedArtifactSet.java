@@ -59,7 +59,7 @@ public class BuildDependenciesOnlyVisitedArtifactSet implements VisitedArtifactS
             for (UnresolvedDependency unresolvedDependency : unresolvedDependencies) {
                 visitor.visitFailure(unresolvedDependency.getProblem());
             }
-            selectedArtifacts.collectBuildDependencies(visitor);
+            visitor.add(selectedArtifacts);
         }
 
         @Override
