@@ -85,6 +85,7 @@ import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.internal.project.ProjectState;
 import org.gradle.api.internal.project.ProjectStateRegistry;
 import org.gradle.api.internal.tasks.AbstractTaskDependency;
+import org.gradle.api.internal.tasks.TaskDependencyContainer;
 import org.gradle.api.internal.tasks.TaskDependencyResolveContext;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.specs.Specs;
@@ -346,8 +347,8 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
         for (Configuration configuration : extendsFrom) {
             if (configuration.getHierarchy().contains(this)) {
                 throw new InvalidUserDataException(String.format(
-                    "Cyclic extendsFrom from %s and %s is not allowed. See existing hierarchy: %s", this,
-                    configuration, configuration.getHierarchy()));
+                        "Cyclic extendsFrom from %s and %s is not allowed. See existing hierarchy: %s", this,
+                        configuration, configuration.getHierarchy()));
             }
             if (this.extendsFrom.add(configuration)) {
                 if (inheritedArtifacts != null) {
@@ -598,17 +599,17 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
                 Path projectPath = domainObjectContext.getProjectPath();
                 String projectPathString = domainObjectContext.isScript() ? null : (projectPath == null ? null : projectPath.getPath());
                 return BuildOperationDescriptor.displayName(displayName)
-                    .progressDisplayName(displayName)
-                    .details(new ResolveConfigurationResolutionBuildOperationDetails(
-                        getName(),
-                        domainObjectContext.isScript(),
-                        getDescription(),
-                        domainObjectContext.getBuildPath().getPath(),
-                        projectPathString,
-                        isVisible(),
-                        isTransitive(),
-                        resolver.getRepositories()
-                    ));
+                        .progressDisplayName(displayName)
+                        .details(new ResolveConfigurationResolutionBuildOperationDetails(
+                                getName(),
+                                domainObjectContext.isScript(),
+                                getDescription(),
+                                domainObjectContext.getBuildPath().getPath(),
+                                projectPathString,
+                                isVisible(),
+                                isTransitive(),
+                                resolver.getRepositories()
+                        ));
             }
         });
     }
@@ -731,7 +732,7 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
         }
         for (Configuration configuration : this.extendsFrom) {
             PublishArtifactSet allArtifacts = configuration.getAllArtifacts();
-            if (inheritedArtifacts!= null || !allArtifacts.isEmpty()) {
+            if (inheritedArtifacts != null || !allArtifacts.isEmpty()) {
                 if (inheritedArtifacts == null) {
                     // This configuration cannot be mutated, but some parent configurations provide artifacts
                     inheritedArtifacts = CompositeDomainObjectSet.create(PublishArtifact.class, ownArtifacts);
@@ -838,8 +839,8 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
         String newName = name + "Copy";
         Factory<ResolutionStrategyInternal> childResolutionStrategy = resolutionStrategy != null ? Factories.constant(resolutionStrategy.copy()) : resolutionStrategyFactory;
         DefaultConfiguration copiedConfiguration = instantiator.newInstance(DefaultConfiguration.class, domainObjectContext, newName,
-            configurationsProvider, resolver, listenerManager, metaDataProvider, childResolutionStrategy, projectAccessListener, projectFinder, fileCollectionFactory, buildOperationExecutor, instantiator, artifactNotationParser, capabilityNotationParser, attributesFactory,
-            rootComponentMetadataBuilder, projectStateRegistry, documentationRegistry);
+                configurationsProvider, resolver, listenerManager, metaDataProvider, childResolutionStrategy, projectAccessListener, projectFinder, fileCollectionFactory, buildOperationExecutor, instantiator, artifactNotationParser, capabilityNotationParser, attributesFactory,
+                rootComponentMetadataBuilder, projectStateRegistry, documentationRegistry);
         configurationsProvider.setTheOnlyConfiguration(copiedConfiguration);
         // state, cachedResolvedConfiguration, and extendsFrom intentionally not copied - must re-resolve copy
         // copying extendsFrom could mess up dependencies when copy was re-resolved
@@ -1598,7 +1599,12 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
             selected.visitDependencies(new TaskDependencyResolveContext() {
                 @Override
                 public void add(Object dep) {
-                    context.add(dep);
+                    if (dep instanceof TaskDependencyContainer) {
+                        TaskDependencyContainer container = (TaskDependencyContainer) dep;
+                        container.visitDependencies(this);
+                    } else {
+                        context.add(dep);
+                    }
                 }
 
                 @Override
