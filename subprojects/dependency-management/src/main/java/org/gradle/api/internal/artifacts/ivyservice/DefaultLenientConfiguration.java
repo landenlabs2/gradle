@@ -113,11 +113,11 @@ public class DefaultLenientConfiguration implements LenientConfiguration, Visite
 
         return new SelectedArtifactSet() {
             @Override
-            public void collectBuildDependencies(TaskDependencyResolveContext visitor) {
+            public void visitDependencies(TaskDependencyResolveContext context) {
                 for (UnresolvedDependency unresolvedDependency : unresolvedDependencies) {
-                    visitor.visitFailure(unresolvedDependency.getProblem());
+                    context.visitFailure(unresolvedDependency.getProblem());
                 }
-                visitor.add(artifactResults);
+                context.add(artifactResults.getArtifacts());
             }
 
             @Override

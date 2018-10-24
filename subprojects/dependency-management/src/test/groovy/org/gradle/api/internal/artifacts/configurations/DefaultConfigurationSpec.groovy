@@ -72,7 +72,9 @@ import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static org.gradle.api.artifacts.Configuration.State.*
+import static org.gradle.api.artifacts.Configuration.State.RESOLVED
+import static org.gradle.api.artifacts.Configuration.State.RESOLVED_WITH_FAILURES
+import static org.gradle.api.artifacts.Configuration.State.UNRESOLVED
 import static org.hamcrest.Matchers.equalTo
 import static org.junit.Assert.assertThat
 
@@ -562,7 +564,7 @@ class DefaultConfigurationSpec extends Specification {
 
         given:
         _ * visitedArtifactSet.select(_, _, _, _) >> selectedArtifactSet
-        _ * selectedArtifactSet.collectBuildDependencies(_) >> { TaskDependencyResolveContext visitor -> visitor.add(artifactTaskDependencies) }
+        _ * selectedArtifactSet.visitDependencies(_) >> { TaskDependencyResolveContext visitor -> visitor.add(artifactTaskDependencies) }
         _ * artifactTaskDependencies.getDependencies(_) >> requiredTasks
 
         and:
@@ -1636,7 +1638,7 @@ All Artifacts:
         def visitedArtifactSet = Stub(VisitedArtifactSet)
         def selectedArtifactSet = Stub(SelectedArtifactSet)
         _ * visitedArtifactSet.select(_, _, _, _) >> selectedArtifactSet
-        _ * selectedArtifactSet.collectBuildDependencies(_) >> { Collection<Object> deps -> deps }
+        _ * selectedArtifactSet.visitDependencies(_) >> { Collection<Object> deps -> deps }
         visitedArtifactSet
     }
 
