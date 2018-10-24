@@ -28,6 +28,8 @@ public interface PerformanceTestExecution {
      */
     String getExecutionId();
 
+    int getTeamCityBuildId();
+
     String getVersionUnderTest();
     String getVcsBranch();
     long getStartTime();

@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
+import static org.gradle.performance.results.PerformanceTestResult.DEFAULT_TEAMCITY_BUILD_ID;
 import static org.gradle.performance.results.ResultsStoreHelper.toArray;
 
 /**
@@ -79,7 +80,7 @@ public class CrossVersionResultsStore implements DataReporter<CrossVersionPerfor
                     ResultSet keys = null;
 
                     try {
-                        statement = connection.prepareStatement("insert into testExecution(testId, startTime, endTime, targetVersion, testProject, tasks, args, gradleOpts, daemon, operatingSystem, jvm, vcsBranch, vcsCommit, channel, host, cleanTasks) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        statement = connection.prepareStatement("insert into testExecution(testId, startTime, endTime, targetVersion, testProject, tasks, args, gradleOpts, daemon, operatingSystem, jvm, vcsBranch, vcsCommit, channel, host, cleanTasks, teamCityBuildId) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                         statement.setString(1, results.getTestId());
                         statement.setTimestamp(2, new Timestamp(results.getStartTime()));
                         statement.setTimestamp(3, new Timestamp(results.getEndTime()));
@@ -97,6 +98,7 @@ public class CrossVersionResultsStore implements DataReporter<CrossVersionPerfor
                         statement.setString(14, results.getChannel());
                         statement.setString(15, results.getHost());
                         statement.setObject(16, toArray(results.getCleanTasks()));
+                        statement.setInt(17, results.getTeamCityBuildId());
                         statement.execute();
                         keys = statement.getGeneratedKeys();
                         keys.next();
@@ -195,7 +197,7 @@ public class CrossVersionResultsStore implements DataReporter<CrossVersionPerfor
                     ResultSet operations = null;
 
                     try {
-                        executionsForName = connection.prepareStatement("select top ? id, startTime, endTime, targetVersion, testProject, tasks, args, gradleOpts, daemon, operatingSystem, jvm, vcsBranch, vcsCommit, channel, host, cleanTasks from testExecution where testId = ? and startTime >= ? and channel = ? order by startTime desc");
+                        executionsForName = connection.prepareStatement("select top ? id, startTime, endTime, targetVersion, testProject, tasks, args, gradleOpts, daemon, operatingSystem, jvm, vcsBranch, vcsCommit, channel, host, cleanTasks, teamCityBuildId from testExecution where testId = ? and startTime >= ? and channel = ? order by startTime desc");
                         executionsForName.setFetchSize(mostRecentN);
                         executionsForName.setInt(1, mostRecentN);
                         executionsForName.setString(2, testName);
@@ -223,6 +225,8 @@ public class CrossVersionResultsStore implements DataReporter<CrossVersionPerfor
                             performanceResults.setChannel(testExecutions.getString(14));
                             performanceResults.setHost(testExecutions.getString(15));
                             performanceResults.setCleanTasks(ResultsStoreHelper.toList(testExecutions.getObject(16)));
+                            performanceResults.setTeamCityBuildId(testExecutions.getInt(17));
+
                             results.put(id, performanceResults);
                             allBranches.add(performanceResults.getVcsBranch());
                         }
@@ -318,6 +322,9 @@ public class CrossVersionResultsStore implements DataReporter<CrossVersionPerfor
                 }
                 if (!DataBaseSchemaUtil.columnExists(connection, "TESTEXECUTION", "HOST")) {
                     statement.execute("alter table testExecution add column if not exists host varchar");
+                }
+                if (!DataBaseSchemaUtil.columnExists(connection, "TESTEXECUTION", "TEAMCITYBUILDID")) {
+                    statement.execute("alter table testExecution add column if not exists teamCityBuildId int not null default " + DEFAULT_TEAMCITY_BUILD_ID);
                 }
                 statement.execute("create index if not exists testExecution_testId on testExecution (testId)");
                 statement.execute("create index if not exists testExecution_executionTime on testExecution (startTime desc)");

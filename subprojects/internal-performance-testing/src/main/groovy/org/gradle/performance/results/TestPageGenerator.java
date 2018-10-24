@@ -33,6 +33,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import static org.gradle.performance.results.PerformanceTestResult.DEFAULT_TEAMCITY_BUILD_ID;
+
 public class TestPageGenerator extends HtmlPageGenerator<PerformanceTestHistory> {
     @Override
     protected int getDepth() {
@@ -115,7 +117,7 @@ public class TestPageGenerator extends HtmlPageGenerator<PerformanceTestHistory>
                 PerformanceTestExecution results = testHistory.getExecutions().get(i);
                 tr();
                 id("result" + results.getExecutionId());
-                textCell(format.timestamp(new Date(results.getStartTime())));
+                renderDateAndLink(results);
                 textCell(results.getVcsBranch());
 
                 td();
@@ -145,6 +147,16 @@ public class TestPageGenerator extends HtmlPageGenerator<PerformanceTestHistory>
             footer(this);
             endAll();
         }
+
+            private void renderDateAndLink(PerformanceTestExecution results) {
+                td();
+                    String date = format.timestamp(new Date(results.getStartTime()));
+                    if(results.getTeamCityBuildId() == DEFAULT_TEAMCITY_BUILD_ID) {
+                        text(date);
+                    }
+                    a().href("https://builds.gradle.org/viewLog.html?buildId=" + results.getTeamCityBuildId()).target("_blank").text(date).end();
+                end();
+            }
 
             private void renderVcsLinks(PerformanceTestExecution results, PerformanceTestExecution previousResults) {
                 List<GitHubLink> vcsCommits = createGitHubLinks(results.getVcsCommits());

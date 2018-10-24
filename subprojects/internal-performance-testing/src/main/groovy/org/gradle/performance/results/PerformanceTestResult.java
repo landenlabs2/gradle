@@ -19,19 +19,21 @@ package org.gradle.performance.results;
 import java.util.List;
 
 public abstract class PerformanceTestResult {
-
-    String testId;
-    String jvm;
-    String operatingSystem;
-    String host;
-    long startTime;
-    long endTime;
-    String vcsBranch;
-    List<String> vcsCommits;
-    List<String> previousTestIds;
-    String versionUnderTest;
-    String channel;
-    Throwable whereAmI;
+    // for backward-compatibility, teamCityBuildId column doesn't exist at the beginning
+    public static final int DEFAULT_TEAMCITY_BUILD_ID = 0;
+    private String testId;
+    private int teamCityBuildId;
+    private String jvm;
+    private String operatingSystem;
+    private String host;
+    private long startTime;
+    private long endTime;
+    private String vcsBranch;
+    private List<String> vcsCommits;
+    private List<String> previousTestIds;
+    private String versionUnderTest;
+    private String channel;
+    private Throwable whereAmI;
 
     public  PerformanceTestResult() {
         whereAmI = new Throwable();
@@ -52,6 +54,14 @@ public abstract class PerformanceTestResult {
 
     public void setTestId(String testId) {
         this.testId = testId;
+    }
+
+    public int getTeamCityBuildId() {
+        return teamCityBuildId;
+    }
+
+    public void setTeamCityBuildId(int teamCityBuildId) {
+        this.teamCityBuildId = teamCityBuildId;
     }
 
     public List<String> getPreviousTestIds() {

@@ -134,6 +134,11 @@ public class CrossBuildPerformanceTestHistory implements PerformanceTestHistory 
         }
 
         @Override
+        public int getTeamCityBuildId() {
+            return results.getTeamCityBuildId();
+        }
+
+        @Override
         public String getVersionUnderTest() {
             return results.getVersionUnderTest();
         }

@@ -55,6 +55,10 @@ public class ResultsStoreHelper {
         return System.getProperty(SYSPROP_PERFORMANCE_TEST_CHANNEL, "commits");
     }
 
+    public static Integer determineTeamCityBuildId() {
+        return System.getenv("BUILD_ID") == null ? 0 : Integer.parseInt(System.getenv("BUILD_ID"));
+    }
+
     public static boolean isAdhocPerformanceTest() {
         return "adhoc".equals(determineChannel());
     }
